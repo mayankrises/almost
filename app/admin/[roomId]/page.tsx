@@ -49,7 +49,7 @@ export default function RoomAdminPage({ params }: { params: Promise<{ roomId: st
 
     const getOrCreatePC = (senderId: string) => {
       let pc = pcsRef.current[senderId];
-      if (!pc || pc.signalingState === "closed") {
+      if (!pc || (pc.signalingState as string) === "closed") {
         console.log(`[Admin] Structuring new RTCPeerConnection for client ${senderId}`);
         pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
         pcsRef.current[senderId] = pc;
@@ -123,7 +123,7 @@ export default function RoomAdminPage({ params }: { params: Promise<{ roomId: st
         console.log(`[Admin] 📥 Received offer from client ${msg.senderId}`);
         try {
           await targetPc.setRemoteDescription(new RTCSessionDescription(msg.payload));
-          if (cancelled || targetPc.signalingState === "closed") return;
+          if (cancelled || (targetPc.signalingState as string) === "closed") return;
           
           // Drain any queued ICE candidates that arrived early
           const queue = iceQueuesRef.current[msg.senderId] || [];
@@ -134,10 +134,10 @@ export default function RoomAdminPage({ params }: { params: Promise<{ roomId: st
           iceQueuesRef.current[msg.senderId] = [];
 
           const answer = await targetPc.createAnswer();
-          if (cancelled || targetPc.signalingState === "closed") return;
+          if (cancelled || (targetPc.signalingState as string) === "closed") return;
           
           await targetPc.setLocalDescription(answer);
-          if (cancelled || targetPc.signalingState === "closed") return;
+          if (cancelled || (targetPc.signalingState as string) === "closed") return;
           
           console.log(`[Admin] 📤 Sending answer back to client ${msg.senderId}`);
           localSocket.emit("signal", {
