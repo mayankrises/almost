@@ -13,7 +13,17 @@ export interface WebRTCState {
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
-  { urls: "stun:stun2.l.google.com:19302" }
+  { urls: "stun:stun2.l.google.com:19302" },
+  {
+    urls: "turn:openrelay.metered.ca:80",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turn:openrelay.metered.ca:443",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
 ];
 
 export function useWebRTC(signalingUrl?: string, roomId: string = "default", clientId: string | null = null) {
@@ -88,11 +98,15 @@ export function useWebRTC(signalingUrl?: string, roomId: string = "default", cli
         if (e.candidate) {
           socketRef.current?.emit("signal", { 
             to: targetId, 
-            from: clientId, 
+            from: socketRef.current?.id || clientId, 
             type: "ice-candidate", 
             payload: e.candidate.toJSON() 
           });
         }
+      };
+
+      pc.oniceconnectionstatechange = () => {
+        console.log(`[Client WebRTC] 🌐 ICE connection state: ${pc.iceConnectionState}`);
       };
 
       pc.onconnectionstatechange = () => {
@@ -105,7 +119,7 @@ export function useWebRTC(signalingUrl?: string, roomId: string = "default", cli
       console.log(`[Client WebRTC] 📤 Offer sent to admin (${targetId})`);
       socketRef.current?.emit("signal", { 
         to: targetId, 
-        from: clientId, 
+        from: socketRef.current?.id || clientId, 
         type: "offer", 
         payload: offer 
       });
