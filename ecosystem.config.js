@@ -9,8 +9,8 @@ module.exports = {
         PORT: 3000,
         NEXT_PUBLIC_SIGNALING_URL: "ws://localhost:3002"
       },
-      instances: "max",
-      exec_mode: "cluster"
+      instances: 1,
+      exec_mode: "fork"
     },
     {
       name: "veristream-signal",
@@ -25,3 +25,4 @@ module.exports = {
     }
   ]
 };
+

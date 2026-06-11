@@ -5,7 +5,8 @@ let socket: Socket | null = null;
 export function getSocket(url?: string): Socket {
   if (!socket) {
     console.log("[Socket] 🏗️ Creating global singleton socket...");
-    socket = io(url || undefined, {
+    const targetUrl = url || process.env.NEXT_PUBLIC_SIGNALING_URL || undefined;
+    socket = io(targetUrl, {
       transports: ["websocket"],
       reconnectionAttempts: 15,
       reconnectionDelay: 2000,
@@ -21,3 +22,4 @@ export function getSocket(url?: string): Socket {
   }
   return socket;
 }
+
